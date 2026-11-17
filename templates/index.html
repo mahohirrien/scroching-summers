@@ -3,63 +3,470 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wildfires in France</title>
+    <title>INCENDIX | Wildfire Risk Simulator</title>
+    
+    <!-- Polices -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js pour la Section 1 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .form-container { background-color: #f4f4f4; padding: 20px; border-radius: 8px; max-width: 400px; }
-        input { margin-bottom: 10px; width: 100%; padding: 8px; box-sizing: border-box; }
-        button { background-color: #d9534f; color: white; border: none; padding: 10px 15px; cursor: pointer; width: 100%; font-weight: bold; }
-        button:hover { background-color: #c9302c; }
-        #result { margin-top: 20px; font-weight: bold; }
+        /* --- PALETTE: MONOCHROME CRIMSON --- */
+        :root {
+            --bg-primary: #A61212;
+            --bg-secondary: #870D0D;
+            --bg-darker: #7a0b0b;
+            --text-main: #F7F3EE;
+            --text-muted: rgba(247, 243, 238, 0.65);
+            --grid-line: rgba(247, 243, 238, 0.12);
+        }
+
+        html { scroll-behavior: smooth; }
+        
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* --- 1. ACCUEIL (HERO) --- */
+        #home {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 20px;
+            background: radial-gradient(circle at 50% 50%, var(--bg-primary) 0%, var(--bg-darker) 100%);
+            background-image: 
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 80px 80px;
+            background-position: center center;
+        }
+
+        .title-wrapper {
+            position: relative;
+            z-index: 2;
+            padding: 20px;
+            cursor: crosshair;
+        }
+
+        /* Titre et nouvel effet thermique 100% CSS (Anti-bug) */
+        .main-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: clamp(4rem, 12vw, 9rem);
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            margin: 0;
+            text-transform: uppercase;
+            color: var(--text-main);
+            line-height: 1;
+            text-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease; /* Pour un retour au calme fluide */
+            
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* La classe activée par le JavaScript au survol */
+        .main-title.heat-active {
+            color: #ffffff;
+            /* Animation qui simule le tremblement de l'air chaud */
+            animation: cssHeatMirage 0.15s infinite alternate;
+            /* Ombres montantes oranges/rouges pour le feu */
+            text-shadow: 
+                0 -10px 20px rgba(255, 69, 0, 0.8),
+                0 -25px 40px rgba(255, 140, 0, 0.5),
+                0 15px 40px rgba(0, 0, 0, 0.6);
+            filter: blur(1px);
+        }
+
+        .fire-glow {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 120%;
+            height: 120%;
+            background: radial-gradient(circle, rgba(247, 243, 238, 0.15) 0%, transparent 60%);
+            transform: translate(-50%, -50%);
+            filter: blur(30px);
+            z-index: -1;
+            animation: flicker 4s infinite alternate ease-in-out;
+        }
+
+        .intro-box {
+            max-width: 700px;
+            margin-top: 40px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation-delay: 0.4s;
+            z-index: 2;
+            background: rgba(135, 13, 13, 0.6);
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--grid-line);
+            border-radius: 4px;
+        }
+
+        .intro-text {
+            font-weight: 300;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .intro-text strong {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        /* --- 2. BARRE DE NAVIGATION --- */
+        .sticky-nav {
+            position: sticky;
+            top: 0;
+            background: rgba(166, 18, 18, 0.85);
+            backdrop-filter: blur(15px);
+            z-index: 1000;
+            border-bottom: 1px solid var(--grid-line);
+            padding: 20px 0;
+        }
+
+        .sticky-nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 40px;
+        }
+
+        .sticky-nav a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .sticky-nav a:hover { color: var(--text-main); }
+        
+        .sticky-nav a::after {
+            content: '';
+            position: absolute;
+            width: 0%;
+            height: 2px;
+            bottom: -6px;
+            left: 0;
+            background-color: var(--text-main);
+            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .sticky-nav a:hover::after { width: 100%; }
+
+        /* --- 3. SECTIONS COMMUNES (Balayage) --- */
+        .section-bloc {
+            min-height: 70vh;
+            margin: 0;
+            padding: 100px 40px;
+            border-top: 1px solid var(--grid-line);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        
+        .section-bloc.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #causes { background-color: var(--bg-secondary); }
+        #weather { background-color: var(--bg-primary); }
+        #vegetation { background-color: var(--bg-darker); }
+        #impact { background-color: var(--bg-secondary); }
+        
+        .section-bloc h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.5rem;
+            color: var(--text-main);
+            margin-bottom: 50px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-align: center;
+        }
+
+        /* --- 4. SECTION 1 : QUIZ & CHART --- */
+        .quiz-container {
+            text-align: center;
+            width: 100%;
+            max-width: 700px;
+            z-index: 2;
+        }
+        .quiz-question {
+            font-size: 1.4rem;
+            margin-bottom: 40px;
+            font-weight: 300;
+            color: var(--text-main);
+        }
+        .quiz-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .quiz-btn {
+            background-color: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--grid-line);
+            padding: 20px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+            border-radius: 4px;
+        }
+        .quiz-btn:hover {
+            background-color: rgba(247, 243, 238, 0.05);
+            color: var(--text-main);
+            border-color: var(--text-main);
+        }
+        
+        .quiz-btn.error {
+            background-color: rgba(0, 0, 0, 0.4);
+            border-color: #000;
+            color: #fff;
+            animation: shake 0.4s;
+        }
+        .quiz-btn.success {
+            background-color: var(--text-main);
+            color: var(--bg-secondary);
+            font-weight: 600;
+            border-color: var(--text-main);
+        }
+        
+        #chart-container {
+            margin-top: 50px;
+            width: 100%;
+            max-width: 500px;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        #chart-container.revealed {
+            opacity: 1;
+            max-height: 700px;
+            padding-top: 20px;
+        }
+
+        /* --- KEYFRAMES --- */
+        @keyframes fadeUp {
+            0% { opacity: 0; transform: translateY(40px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes flicker {
+            0% { opacity: 0.5; transform: translate(-50%, -50%) scale(0.95); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); }
+            75% { transform: translateX(-10px); }
+            100% { transform: translateX(0); }
+        }
+
+        @keyframes cssHeatMirage {
+            0% { transform: scale(1) skewX(0deg) translateY(0); }
+            100% { transform: scale(1.01) skewX(-1deg) translateY(-2px); }
+        }
     </style>
 </head>
 <body>
-    <h1>🔥 The Red Summer: Wildfire Risk Simulator</h1>
-    <p>Discover how weather conditions influence the start of wildfires (30-30-30 rule).</p>
 
-    <div class="form-container">
-        <!-- Le formulaire en anglais -->
-        <form id="weather-form">
-            <label for="temp">🌡️ Temperature (°C):</label>
-            <input type="number" id="temp" name="temp" value="25" required>
+    <!-- 1. HOME -->
+    <header id="home">
+        <div class="title-wrapper" id="hero-title-box">
+            <div class="fire-glow"></div>
+            <!-- C'est ce titre qui va s'animer au survol -->
+            <h1 class="main-title" id="hero-title">Incendix</h1>
+        </div>
+        
+        <div class="intro-box">
+            <p class="intro-text">
+                While climate change intensifies soil drought, understanding the mechanics of fire has never been more critical. In 2022, France saw <strong>over 72,000 hectares</strong> go up in smoke. <br><br>
+                From the initial sparks to the nature of our forests, explore through our interactive data how a <strong>mega-fire</strong> ignites, spreads, and impacts the climate.
+            </p>
+        </div>
+    </header>
 
-            <label for="wind">💨 Wind Speed (km/h):</label>
-            <input type="number" id="wind" name="wind" value="15" required>
+    <!-- 2. NAVIGATION -->
+    <nav class="sticky-nav">
+        <ul>
+            <li><a href="#causes">Causes</a></li>
+            <li><a href="#weather">Weather</a></li>
+            <li><a href="#vegetation">Vegetation</a></li>
+            <li><a href="#impact">Impact</a></li>
+            <li><a href="#methodology">Methodology</a></li>
+        </ul>
+    </nav>
 
-            <label for="humidity">💧 Air Humidity (%):</label>
-            <input type="number" id="humidity" name="humidity" value="50" required>
+    <!-- 3. SECTIONS -->
+    <section id="causes" class="section-bloc">
+        <h2>Causes of fires</h2>
+        
+        <!-- LE QUIZ -->
+        <div class="quiz-container">
+            <p class="quiz-question">In your opinion, what is the main cause of wildfires in France?</p>
+            <div class="quiz-buttons">
+                <button class="quiz-btn" onclick="checkAnswer(this, false)">Extreme heat (Spontaneous combustion)</button>
+                <button class="quiz-btn" onclick="checkAnswer(this, false)">Lightning (Natural)</button>
+                <button class="quiz-btn" onclick="checkAnswer(this, true)">Human activity (Accidents, cigarette butts, arson)</button>
+            </div>
+        </div>
 
-            <button type="submit">Calculate Risk</button>
-        </form>
-    </div>
+        <!-- LE GRAPHIQUE CHART.JS -->
+        <div id="chart-container">
+            <canvas id="causesChart"></canvas>
+            <p style="text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-top: 20px;">
+                Fires of known origin (BDIFF Data). Nearly 90% are human-caused.
+            </p>
+        </div>
+    </section>
 
-    <!-- C'est ici que la réponse de Flask s'affichera -->
-    <h2 id="result"></h2>
+    <!-- SECTIONS VIDES POUR LA SUITE -->
+    <section id="weather" class="section-bloc">
+        <h2>Fire Weather</h2>
+        <p style="color: var(--text-muted);">30-30-30 simulator will go here.</p>
+    </section>
 
-    <!-- L'interaction JavaScript demandée par tes profs -->
+    <section id="vegetation" class="section-bloc">
+        <h2>Vegetation</h2>
+        <p style="color: var(--text-muted);">Interactive map will go here.</p>
+    </section>
+    
+    <section id="impact" class="section-bloc">
+        <h2>Impact & Assessment</h2>
+        <p style="color: var(--text-muted);">Chronological chart and CO2 counters will go here.</p>
+    </section>
+
+    <section id="methodology" class="section-bloc">
+        <h2>Methodology</h2>
+        <p style="color: var(--text-muted);">Sources and data references.</p>
+    </section>
+
+    <!-- 4. SCRIPTS JS -->
     <script>
-        document.getElementById('weather-form').addEventListener('submit', function(event) {
-            event.preventDefault(); // Empêche la page de se recharger au clic
-
-            // 1. On récupère les nombres tapés par l'utilisateur
-            let temp = document.getElementById('temp').value;
-            let wind = document.getElementById('wind').value;
-            let humidity = document.getElementById('humidity').value;
-
-            // 2. On envoie ces données à la "Route Flask" via une requête
-            fetch('/api/simulate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ temp: temp, wind: wind, humidity: humidity })
-            })
-            .then(response => response.json())
-            .then(data => {
-                // 3. On affiche le message renvoyé par Flask avec la bonne couleur
-                let resultElement = document.getElementById('result');
-                resultElement.innerText = data.message;
-                resultElement.style.color = data.color;
-            });
+        /* --- 1. NOUVEL EFFET THERMIQUE (100% STABLE) --- */
+        const titleBox = document.getElementById('hero-title-box');
+        const title = document.getElementById('hero-title');
+        
+        // Ajoute la classe d'animation quand on passe la souris
+        titleBox.addEventListener('mouseenter', () => {
+            title.classList.add('heat-active');
         });
+        
+        // Retire la classe quand on part (le CSS transition adoucit le retour)
+        titleBox.addEventListener('mouseleave', () => {
+            title.classList.remove('heat-active');
+        });
+
+        /* --- 2. FIX ACTUALISATION PAGE --- */
+        if (window.location.hash) {
+            window.history.replaceState(null, null, window.location.pathname);
+        }
+        window.scrollTo(0, 0);
+
+        /* --- 3. SCROLL REVEAL (BALAYAGE SECTIONS) --- */
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) { 
+                    entry.target.classList.add('visible'); 
+                }
+            });
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll('.section-bloc').forEach(sec => observer.observe(sec));
+
+        /* --- 4. LOGIQUE QCM & CHART.JS --- */
+        let chartRendered = false;
+
+        function checkAnswer(button, isCorrect) {
+            document.querySelectorAll('.quiz-btn').forEach(btn => btn.classList.remove('error', 'success'));
+            
+            if (isCorrect) {
+                // Bonne réponse
+                button.classList.add('success');
+                document.getElementById('chart-container').classList.add('revealed');
+                
+                if (!chartRendered) { 
+                    renderChart(); 
+                    chartRendered = true; 
+                }
+                
+                // Scroll fluide pour voir le graphique
+                setTimeout(() => {
+                    document.getElementById('chart-container').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
+
+            } else {
+                // Mauvaise réponse
+                button.classList.add('error');
+                setTimeout(() => button.classList.remove('error'), 400);
+            }
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('causesChart').getContext('2d');
+            
+            Chart.defaults.color = '#F7F3EE';
+            Chart.defaults.font.family = 'Inter';
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Natural', 'Accidental', 'Malicious (Arson)', 'Involuntary (Work)', 'Involuntary (Individuals)'],
+                    datasets: [{
+                        data: [12, 19, 30, 20, 19], 
+                        backgroundColor: [
+                            'rgba(247, 243, 238, 0.8)', // Blanc cassé
+                            '#4a0606', // Rouge sombre
+                            '#B31313', // Rouge clair
+                            'rgba(247, 243, 238, 0.4)', // Semi-transparent
+                            '#000000'  // Noir
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#870D0D', // Couleur du fond de la section
+                        hoverOffset: 15
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    plugins: { 
+                        legend: { position: 'bottom', labels: { padding: 20 } } 
+                    },
+                    cutout: '65%' // Taille du trou au centre
+                }
+            });
+        }
     </script>
 </body>
 </html>
