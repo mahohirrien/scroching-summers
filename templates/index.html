@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wildfires in France</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .form-container { background-color: #f4f4f4; padding: 20px; border-radius: 8px; max-width: 400px; }
+        input { margin-bottom: 10px; width: 100%; padding: 8px; box-sizing: border-box; }
+        button { background-color: #d9534f; color: white; border: none; padding: 10px 15px; cursor: pointer; width: 100%; font-weight: bold; }
+        button:hover { background-color: #c9302c; }
+        #result { margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>🔥 The Red Summer: Wildfire Risk Simulator</h1>
+    <p>Discover how weather conditions influence the start of wildfires (30-30-30 rule).</p>
+
+    <div class="form-container">
+        <!-- Le formulaire en anglais -->
+        <form id="weather-form">
+            <label for="temp">🌡️ Temperature (°C):</label>
+            <input type="number" id="temp" name="temp" value="25" required>
+
+            <label for="wind">💨 Wind Speed (km/h):</label>
+            <input type="number" id="wind" name="wind" value="15" required>
+
+            <label for="humidity">💧 Air Humidity (%):</label>
+            <input type="number" id="humidity" name="humidity" value="50" required>
+
+            <button type="submit">Calculate Risk</button>
+        </form>
+    </div>
+
+    <!-- C'est ici que la réponse de Flask s'affichera -->
+    <h2 id="result"></h2>
+
+    <!-- L'interaction JavaScript demandée par tes profs -->
+    <script>
+        document.getElementById('weather-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Empêche la page de se recharger au clic
+
+            // 1. On récupère les nombres tapés par l'utilisateur
+            let temp = document.getElementById('temp').value;
+            let wind = document.getElementById('wind').value;
+            let humidity = document.getElementById('humidity').value;
+
+            // 2. On envoie ces données à la "Route Flask" via une requête
+            fetch('/api/simulate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ temp: temp, wind: wind, humidity: humidity })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 3. On affiche le message renvoyé par Flask avec la bonne couleur
+                let resultElement = document.getElementById('result');
+                resultElement.innerText = data.message;
+                resultElement.style.color = data.color;
+            });
+        });
+    </script>
+</body>
+</html>
