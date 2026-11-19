@@ -3,469 +3,903 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INCENDIX | Wildfire Risk Simulator</title>
+    <title>Scorching summers: the mechanics of wildfires</title>
     
-    <!-- Polices -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
-    
-    <!-- Chart.js pour la Section 1 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* --- PALETTE: MONOCHROME CRIMSON --- */
-        :root {
-            --bg-primary: #A61212;
-            --bg-secondary: #870D0D;
-            --bg-darker: #7a0b0b;
-            --text-main: #F7F3EE;
-            --text-muted: rgba(247, 243, 238, 0.65);
-            --grid-line: rgba(247, 243, 238, 0.12);
-        }
-
         html { scroll-behavior: smooth; }
-        
-        body {
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-main);
-            overflow-x: hidden;
-        }
+        body { margin: 0; font-family: 'Inter', sans-serif; background-color: #0a0a0a; color: #ffffff; overflow-x: hidden; }
 
-        /* --- 1. ACCUEIL (HERO) --- */
         #home {
+            position: relative;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            position: relative;
-            padding: 20px;
-            background: radial-gradient(circle at 50% 50%, var(--bg-primary) 0%, var(--bg-darker) 100%);
-            background-image: 
-                linear-gradient(var(--grid-line) 1px, transparent 1px),
-                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-            background-size: 80px 80px;
-            background-position: center center;
+            padding: 40px 20px;
+            background-color: #0a0a0a;
+            box-sizing: border-box;
         }
 
-        .title-wrapper {
+        .title-video-box {
             position: relative;
+            width: 100%;
+            max-width: 1200px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        .text-mask {
+            position: relative;
+            width: 100%;
             z-index: 2;
-            padding: 20px;
-            cursor: crosshair;
+            background-color: #0a0a0a;
+            color: #ffffff;
+            mix-blend-mode: multiply;
+            padding: 10px 0;
+            text-align: center;
         }
 
-        /* Titre et nouvel effet thermique 100% CSS (Anti-bug) */
         .main-title {
             font-family: 'Montserrat', sans-serif;
-            font-size: clamp(4rem, 12vw, 9rem);
+            font-size: clamp(3rem, 8.5vw, 8.5rem);
             font-weight: 900;
+            text-transform: uppercase;
             letter-spacing: -0.02em;
             margin: 0;
-            text-transform: uppercase;
-            color: var(--text-main);
             line-height: 1;
-            text-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
-            transition: all 0.3s ease; /* Pour un retour au calme fluide */
-            
-            opacity: 0;
-            transform: translateY(30px);
-            animation: fadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        /* La classe activée par le JavaScript au survol */
-        .main-title.heat-active {
+        .sub-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: clamp(1.2rem, 3vw, 2.4rem);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
             color: #ffffff;
-            /* Animation qui simule le tremblement de l'air chaud */
-            animation: cssHeatMirage 0.15s infinite alternate;
-            /* Ombres montantes oranges/rouges pour le feu */
-            text-shadow: 
-                0 -10px 20px rgba(255, 69, 0, 0.8),
-                0 -25px 40px rgba(255, 140, 0, 0.5),
-                0 15px 40px rgba(0, 0, 0, 0.6);
-            filter: blur(1px);
-        }
-
-        .fire-glow {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 120%;
-            height: 120%;
-            background: radial-gradient(circle, rgba(247, 243, 238, 0.15) 0%, transparent 60%);
-            transform: translate(-50%, -50%);
-            filter: blur(30px);
-            z-index: -1;
-            animation: flicker 4s infinite alternate ease-in-out;
+            margin: 15px 0 0 0;
+            text-align: center;
+            z-index: 3;
         }
 
         .intro-box {
-            max-width: 700px;
+            position: relative;
+            z-index: 3;
+            max-width: 800px;
             margin-top: 40px;
             text-align: center;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 30px 40px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             opacity: 0;
             transform: translateY(30px);
-            animation: fadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            animation-delay: 0.4s;
-            z-index: 2;
-            background: rgba(135, 13, 13, 0.6);
-            padding: 30px;
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--grid-line);
-            border-radius: 4px;
+            animation: fadeUp 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation-delay: 0.6s;
         }
 
         .intro-text {
             font-weight: 300;
             font-size: 1.1rem;
             line-height: 1.8;
-            color: var(--text-muted);
+            color: #d0d0d0;
             margin: 0;
         }
 
         .intro-text strong {
-            color: var(--text-main);
+            color: #ffffff;
             font-weight: 600;
+            background: linear-gradient(90deg, #ff4500, #ff8c00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        /* --- 2. BARRE DE NAVIGATION --- */
-        .sticky-nav {
-            position: sticky;
-            top: 0;
-            background: rgba(166, 18, 18, 0.85);
-            backdrop-filter: blur(15px);
-            z-index: 1000;
-            border-bottom: 1px solid var(--grid-line);
-            padding: 20px 0;
-        }
-
-        .sticky-nav ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 40px;
-        }
-
-        .sticky-nav a {
-            text-decoration: none;
-            color: var(--text-muted);
-            font-weight: 600;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            transition: color 0.3s ease;
-            position: relative;
-        }
-
-        .sticky-nav a:hover { color: var(--text-main); }
-        
-        .sticky-nav a::after {
-            content: '';
-            position: absolute;
-            width: 0%;
-            height: 2px;
-            bottom: -6px;
-            left: 0;
-            background-color: var(--text-main);
-            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        
+        .sticky-nav { position: sticky; top: 0; background: rgba(10, 10, 10, 0.85); backdrop-filter: blur(15px); z-index: 1000; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding: 20px 0; }
+        .sticky-nav ul { list-style: none; margin: 0; padding: 0; display: flex; justify-content: center; flex-wrap: wrap; gap: 40px; }
+        .sticky-nav a { text-decoration: none; color: #888888; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.4s ease; position: relative; }
+        .sticky-nav a:hover { color: #ffffff; }
+        .sticky-nav a::after { content: ''; position: absolute; width: 0%; height: 2px; bottom: -6px; left: 50%; transform: translateX(-50%); background-color: #ff4500; transition: width 0.3s ease; }
         .sticky-nav a:hover::after { width: 100%; }
 
-        /* --- 3. SECTIONS COMMUNES (Balayage) --- */
-        .section-bloc {
-            min-height: 70vh;
-            margin: 0;
-            padding: 100px 40px;
-            border-top: 1px solid var(--grid-line);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            
-            opacity: 0;
-            transform: translateY(50px);
-            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-        }
+        .section-bloc { min-height: 70vh; margin: 0; padding: 80px 40px; border-top: 1px solid rgba(255,255,255,0.02); display: flex; flex-direction: column; align-items: center; opacity: 0; transform: translateY(60px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
+        .section-bloc.visible { opacity: 1; transform: translateY(0); }
+        #causes { background-color: #0f0f0f; } #weather { background-color: #0a0a0a; } #vegetation { background-color: #111111; } #impact { background-color: #0d0d0d; padding: 60px 40px; } #methodology { background-color: #0a0a0a; }
         
-        .section-bloc.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        #causes { background-color: var(--bg-secondary); }
-        #weather { background-color: var(--bg-primary); }
-        #vegetation { background-color: var(--bg-darker); }
-        #impact { background-color: var(--bg-secondary); }
+        .section-bloc h2 { font-family: 'Montserrat', sans-serif; font-size: 2.3rem; color: #ffffff; margin: 0 0 15px 0; text-transform: uppercase; letter-spacing: 0.05em; text-align: center; }
         
-        .section-bloc h2 {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 2.5rem;
-            color: var(--text-main);
-            margin-bottom: 50px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+        .section-stakes {
+            max-width: 780px;
             text-align: center;
-        }
-
-        /* --- 4. SECTION 1 : QUIZ & CHART --- */
-        .quiz-container {
-            text-align: center;
-            width: 100%;
-            max-width: 700px;
-            z-index: 2;
-        }
-        .quiz-question {
-            font-size: 1.4rem;
-            margin-bottom: 40px;
+            color: #b0b0b0;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin: 0 0 35px 0;
             font-weight: 300;
-            color: var(--text-main);
         }
-        .quiz-buttons {
+
+        .quiz-container { text-align: center; width: 100%; max-width: 700px; z-index: 2; }
+        .quiz-question { font-size: 1.3rem; margin-bottom: 25px; font-weight: 600; }
+        .quiz-buttons { display: flex; flex-direction: column; gap: 15px; }
+        .quiz-btn { background-color: rgba(255, 255, 255, 0.05); color: #fff; border: 1px solid rgba(255, 255, 255, 0.1); padding: 18px 20px; font-size: 1.05rem; border-radius: 8px; cursor: pointer; transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; font-family: 'Inter', sans-serif; }
+        .quiz-btn:hover { background-color: rgba(255, 255, 255, 0.1); }
+        
+        .quiz-btn.error { background-color: rgba(255, 0, 0, 0.2); border-color: #ff4500; color: #ff4500; }
+        .quiz-btn.success { background-color: rgba(46, 139, 87, 0.2); border-color: #2e8b57; color: #4fbc78; }
+        
+        #chart-section { margin-top: 40px; width: 100%; max-width: 800px; opacity: 0; max-height: 0; overflow: hidden; transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; align-items: center; }
+        #chart-section.revealed { opacity: 1; max-height: 800px; padding-top: 20px; }
+        
+        .chart-and-legend { display: flex; align-items: center; justify-content: center; gap: 40px; width: 100%; flex-wrap: wrap; margin-top: 30px; }
+        .chart-container { width: 300px; height: 300px; position: relative; }
+        
+        .custom-legend { display: flex; flex-direction: column; gap: 15px; }
+        .legend-item { display: flex; align-items: center; gap: 10px; font-size: 1rem; color: #d0d0d0; }
+        .legend-color { width: 20px; height: 20px; border-radius: 4px; border: 1px solid #0f0f0f; }
+        
+        .success-text { text-align: center; color: #d0d0d0; font-size: 1.05rem; line-height: 1.6; max-width: 700px; background: rgba(46, 139, 87, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #2e8b57; }
+
+        .weather-simulator { width: 100%; max-width: 700px; background: rgba(255, 255, 255, 0.02); padding: 35px 40px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.5s ease; z-index: 2; }
+        .simulator-intro { color: #a0a0a0; margin: 0 0 30px 0; text-align: center; line-height: 1.6; }
+        .slider-group { margin-bottom: 25px; }
+        .slider-group label { display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 12px; color: #fff; }
+        .custom-slider { -webkit-appearance: none; width: 100%; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 5px; outline: none; }
+        .custom-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: #ffffff; cursor: pointer; transition: transform 0.1s, background 0.3s; }
+        .custom-slider::-webkit-slider-thumb:hover { transform: scale(1.2); background: #ff4500; }
+        .weather-simulator.danger-low { border-color: rgba(46, 139, 87, 0.3); } .weather-simulator.danger-moderate { border-color: rgba(218, 165, 32, 0.3); } .weather-simulator.danger-high { border-color: rgba(255, 69, 0, 0.5); }
+        .weather-simulator.danger-extreme { background: rgba(255, 69, 0, 0.1); border-color: #ff4500; box-shadow: 0 0 40px rgba(255, 69, 0, 0.15); }
+        #risk-alert-box { margin-top: 30px; padding: 25px; border-radius: 8px; transition: all 0.4s ease; display: block; }
+        .risk-low { background: rgba(46, 139, 87, 0.15); border: 1px solid #2e8b57; } .risk-moderate { background: rgba(218, 165, 32, 0.15); border: 1px solid #daa520; } .risk-high { background: rgba(255, 69, 0, 0.15); border: 1px solid #ff4500; }
+        .risk-extreme { background: #A61212; border: 1px solid #ff4500; }
+        .alert-title { margin: 0 0 12px 0; font-family: 'Montserrat', sans-serif; font-size: 1.3rem; letter-spacing: 0.05em; }
+        .alert-text { margin: 0; font-size: 0.95rem; line-height: 1.6; color: rgba(255,255,255,0.9); }
+
+        .vegetation-intro { color: #a0a0a0; margin: 0 0 30px 0; text-align: center; font-size: 1.05rem; }
+        
+        .map-container {
             display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 35px;
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(255,255,255,0.02);
+            padding: 35px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+            flex-wrap: wrap;
+            box-sizing: border-box;
+        }
+
+        .map-sidebar { display: flex; flex-direction: column; gap: 10px; width: 250px; flex-shrink: 0; }
+        
+        .tree-category-btn {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255,255,255,0.1);
+            color: #fff; padding: 12px 16px; border-radius: 8px; cursor: pointer;
+            text-align: left; transition: all 0.25s ease; display: flex; align-items: center; gap: 12px;
+            font-size: 0.92rem; font-weight: 600; font-family: 'Inter', sans-serif;
+        }
+        .tree-category-btn:hover { background: rgba(255, 255, 255, 0.12); }
+        .tree-category-btn.active { background: rgba(255, 255, 255, 0.18); border-color: #ffffff; }
+        
+        .category-color-dot { width: 16px; height: 16px; border-radius: 4px; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.3); }
+        .dot-oaks { background-color: #a3d991; }
+        .dot-beech { background-color: #215e21; }
+        .dot-maritime { background-color: #c724c7; }
+        .dot-scots { background-color: #e89c14; }
+        .dot-fir { background-color: #19b5e6; }
+        .dot-other { background-color: #807366; }
+
+        .france-map-wrapper {
+            width: 400px;
+            max-width: 100%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #franceCanvas {
+            width: 100%;
+            height: auto;
+            cursor: pointer;
+            filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.6));
+        }
+
+        .tree-info-panel {
+            flex: 1;
+            min-width: 280px;
+            max-width: 380px;
+            background: #ffffff;
+            color: #000000;
+            padding: 22px;
+            border-radius: 8px;
+            border: 3px solid #000000;
+            font-size: 0.92rem;
+            line-height: 1.6;
+            display: none;
             flex-direction: column;
             gap: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-sizing: border-box;
         }
-        .quiz-btn {
-            background-color: transparent;
-            color: var(--text-muted);
-            border: 1px solid var(--grid-line);
-            padding: 20px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Inter', sans-serif;
+        .tree-info-panel.visible { display: flex; }
+        .tree-info-panel img { width: 100%; height: 185px; object-fit: cover; border-radius: 6px; border: 2px solid #000; }
+        .tree-info-text h3 { margin: 0 0 8px 0; font-family: 'Montserrat', sans-serif; font-size: 1.15rem; }
+        .tree-info-text p { margin: 0; }
+
+        .flammability-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 12px;
+            color: #ffffff;
+        }
+        .badge-low { background-color: #2e8b57; }
+        .badge-moderate { background-color: #d98218; }
+        .badge-high { background-color: #c0392b; }
+        .badge-variable { background-color: #555555; }
+
+        .impact-container {
+            width: 100%;
+            max-width: 1050px;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 30px 35px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 2;
+            box-sizing: border-box;
+        }
+
+        .impact-top-row {
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            gap: 30px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .chart-wrapper { flex: 2; min-width: 300px; height: 270px; }
+
+        .counters-wrapper {
+            flex: 1;
+            min-width: 240px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .counter-box {
+            background: rgba(10, 10, 10, 0.8);
+            padding: 18px 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 69, 0, 0.3);
+            text-align: center;
+        }
+
+        .counter-box h4 { margin: 0 0 8px 0; color: #a0a0a0; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.85rem; }
+        .counter-value { font-family: 'Montserrat', sans-serif; font-size: 2.1rem; font-weight: 900; color: #ffffff; text-shadow: 0 0 15px rgba(255, 69, 0, 0.5); }
+        .counter-value small { font-size: 0.9rem; color: #a0a0a0; font-weight: 400; }
+
+        .time-machine { margin-bottom: 20px; text-align: center; }
+        .time-machine label { display: block; font-size: 1.1rem; font-weight: 600; margin-bottom: 10px; color: #ff4500; }
+        
+        .era-text {
+            text-align: left;
+            color: #d0d0d0;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 18px 20px;
+            border-left: 4px solid #ff4500;
             border-radius: 4px;
         }
-        .quiz-btn:hover {
-            background-color: rgba(247, 243, 238, 0.05);
-            color: var(--text-main);
-            border-color: var(--text-main);
+
+        .methodology-content { width: 100%; max-width: 800px; color: #a0a0a0; line-height: 1.8; font-size: 1.05rem; }
+        .methodology-content ul { padding-left: 20px; }
+        .methodology-content li { margin-bottom: 15px; }
+        .methodology-content a { color: #ffffff; font-weight: 600; text-decoration: none; border-bottom: 1px solid #ff4500; transition: color 0.3s ease; }
+        .methodology-content a:hover { color: #ff4500; }
+
+        .about-intro {
+            max-width: 800px;
+            text-align: center;
+            color: #d0d0d0;
+            font-size: 1.05rem;
+            line-height: 1.8;
+            margin: 0 0 50px 0;
+            font-weight: 300;
         }
-        
-        .quiz-btn.error {
-            background-color: rgba(0, 0, 0, 0.4);
-            border-color: #000;
-            color: #fff;
-            animation: shake 0.4s;
+
+        .team-heading {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.4rem;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin: 0 0 30px 0;
+            text-align: center;
         }
-        .quiz-btn.success {
-            background-color: var(--text-main);
-            color: var(--bg-secondary);
-            font-weight: 600;
-            border-color: var(--text-main);
-        }
-        
-        #chart-container {
-            margin-top: 50px;
+
+        .team-grid {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
             width: 100%;
-            max-width: 500px;
-            opacity: 0;
-            max-height: 0;
+            max-width: 1050px;
+        }
+
+        .team-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
             overflow: hidden;
-            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        #chart-container.revealed {
-            opacity: 1;
-            max-height: 700px;
-            padding-top: 20px;
+            width: 290px;
+            text-align: center;
+            transition: border-color 0.3s ease;
         }
 
-        /* --- KEYFRAMES --- */
-        @keyframes fadeUp {
-            0% { opacity: 0; transform: translateY(40px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes flicker {
-            0% { opacity: 0.5; transform: translate(-50%, -50%) scale(0.95); }
-            100% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+        .team-card:hover {
+            border-color: #ff4500;
         }
 
-        @keyframes shake {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            50% { transform: translateX(10px); }
-            75% { transform: translateX(-10px); }
-            100% { transform: translateX(0); }
+        .team-card img {
+            width: 100%;
+            height: 360px;
+            object-fit: cover;
+            display: block;
         }
 
-        @keyframes cssHeatMirage {
-            0% { transform: scale(1) skewX(0deg) translateY(0); }
-            100% { transform: scale(1.01) skewX(-1deg) translateY(-2px); }
+        .team-name {
+            padding: 20px 15px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0;
         }
+
+        @keyframes fadeUp { 0% { opacity: 0; transform: translateY(40px); } 100% { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <!-- 1. HOME -->
     <header id="home">
-        <div class="title-wrapper" id="hero-title-box">
-            <div class="fire-glow"></div>
-            <!-- C'est ce titre qui va s'animer au survol -->
-            <h1 class="main-title" id="hero-title">Incendix</h1>
+        <div class="title-video-box">
+            <video class="video-background" muted playsinline autoplay loop>
+                <source src="/static/images/video feu.mp4" type="video/mp4">
+            </video>
+            <div class="text-mask">
+                <h1 class="main-title">SCORCHING SUMMERS</h1>
+            </div>
         </div>
-        
+
+        <h2 class="sub-title">the mechanics of wildfires</h2>
+
         <div class="intro-box">
             <p class="intro-text">
-                While climate change intensifies soil drought, understanding the mechanics of fire has never been more critical. In 2022, France saw <strong>over 72,000 hectares</strong> go up in smoke. <br><br>
-                From the initial sparks to the nature of our forests, explore through our interactive data how a <strong>mega-fire</strong> ignites, spreads, and impacts the climate.
+                As climate change exacerbates soil drought and escalates fire risks across France, culminating in a record-breaking <strong>72,000 hectares burned in 2022</strong>, understanding the mechanics of wildfires has never been more critical. From the initial spark and meteorological drivers to the underlying flammability of French forests, explore through our interactive data how a fire ignites, spreads, and ultimately impacts our climate.
             </p>
         </div>
     </header>
 
-    <!-- 2. NAVIGATION -->
     <nav class="sticky-nav">
         <ul>
-            <li><a href="#causes">Causes</a></li>
-            <li><a href="#weather">Weather</a></li>
-            <li><a href="#vegetation">Vegetation</a></li>
-            <li><a href="#impact">Impact</a></li>
-            <li><a href="#methodology">Methodology</a></li>
+            <li><a href="#causes">Causes of Ignition</a></li>
+            <li><a href="#weather">Fire Weather</a></li>
+            <li><a href="#vegetation">Vegetation & Fuel</a></li>
+            <li><a href="#impact">Environmental Toll</a></li>
+            <li><a href="#methodology">Sources</a></li>
+            <li><a href="#about">About Us</a></li>
         </ul>
     </nav>
 
-    <!-- 3. SECTIONS -->
     <section id="causes" class="section-bloc">
-        <h2>Causes of fires</h2>
-        
-        <!-- LE QUIZ -->
+        <h2>Causes of Ignition</h2>
+        <p class="section-stakes">
+            Understanding how wildfires start is the cornerstone of prevention. Before analyzing environmental factors, identifying the primary source of ignition reveals where human intervention and public policy can have the greatest impact.
+        </p>
+
         <div class="quiz-container">
-            <p class="quiz-question">In your opinion, what is the main cause of wildfires in France?</p>
+            <p class="quiz-question">Based on current data, what is the primary cause of wildfires in France?</p>
             <div class="quiz-buttons">
-                <button class="quiz-btn" onclick="checkAnswer(this, false)">Extreme heat (Spontaneous combustion)</button>
-                <button class="quiz-btn" onclick="checkAnswer(this, false)">Lightning (Natural)</button>
-                <button class="quiz-btn" onclick="checkAnswer(this, true)">Human activity (Accidents, cigarette butts, arson)</button>
+                <button class="quiz-btn" id="btn1" onclick="checkAnswer(1, false)">Extreme Heat: spontaneous combustion</button>
+                <button class="quiz-btn" id="btn2" onclick="checkAnswer(2, false)">Lightning Strikes: natural phenomena</button>
+                <button class="quiz-btn" id="btn3" onclick="checkAnswer(3, true)">Human Activity: accidents, negligence, or arson</button>
             </div>
         </div>
-
-        <!-- LE GRAPHIQUE CHART.JS -->
-        <div id="chart-container">
-            <canvas id="causesChart"></canvas>
-            <p style="text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-top: 20px;">
-                Fires of known origin (BDIFF Data). Nearly 90% are human-caused.
-            </p>
+        
+        <div id="chart-section">
+            <div class="success-text">
+                Correct. In France, 90% of wildfires are of human origin. These ignitions primarily stem from negligence (such as discarded cigarette butts or agricultural fires) and malicious intent. Conversely, natural causes like lightning strikes remain statistically rare. Understanding this human factor is the first step in effective fire prevention.
+            </div>
+            
+            <div class="chart-and-legend">
+                <div class="chart-container">
+                    <canvas id="causesChart"></canvas>
+                </div>
+                <div class="custom-legend">
+                    <div class="legend-item"><div class="legend-color" style="background-color: #2c3e50;"></div> Natural (12%)</div>
+                    <div class="legend-item"><div class="legend-color" style="background-color: #e67e22;"></div> Accidental (19%)</div>
+                    <div class="legend-item"><div class="legend-color" style="background-color: #c0392b;"></div> Voluntary (30%)</div>
+                    <div class="legend-item"><div class="legend-color" style="background-color: #f39c12;"></div> Involuntary Work (20%)</div>
+                    <div class="legend-item"><div class="legend-color" style="background-color: #d35400;"></div> Involuntary Indiv. (19%)</div>
+                </div>
+            </div>
         </div>
     </section>
 
-    <!-- SECTIONS VIDES POUR LA SUITE -->
     <section id="weather" class="section-bloc">
         <h2>Fire Weather</h2>
-        <p style="color: var(--text-muted);">30-30-30 simulator will go here.</p>
+        <p class="section-stakes">
+            Once a fire ignites, atmospheric conditions dictate its behavior and intensity. Meteorologists rely on specific thresholds to anticipate when a routine blaze can rapidly escalate into an uncontrollable mega-fire.
+        </p>
+
+        <div class="weather-simulator" id="simulator-container">
+            <p class="simulator-intro">Adjust the meteorological variables below to observe their impact on fire risk dynamics.</p>
+            <div class="slider-group"><label for="tempRange">Temperature: <span id="tempVal">20</span>°C</label><input type="range" id="tempRange" min="0" max="45" value="20" class="custom-slider"></div>
+            <div class="slider-group"><label for="windRange">Wind Speed: <span id="windVal">15</span> km/h</label><input type="range" id="windRange" min="0" max="80" value="15" class="custom-slider"></div>
+            <div class="slider-group"><label for="humRange">Air Humidity: <span id="humVal">60</span>%</label><input type="range" id="humRange" min="10" max="100" value="60" class="custom-slider"></div>
+            
+            <div id="risk-alert-box" class="risk-low">
+                <h3 class="alert-title" id="risk-title">Safe State</h3>
+                <p class="alert-text" id="risk-text">Under current meteorological parameters, the Fire Weather Index (FWI) remains stable. The risk of rapid fire propagation is low.</p>
+            </div>
+        </div>
     </section>
 
     <section id="vegetation" class="section-bloc">
-        <h2>Vegetation</h2>
-        <p style="color: var(--text-muted);">Interactive map will go here.</p>
+        <h2>Vegetation & Fuel</h2>
+        <p class="section-stakes">
+            Not all forests burn at the same rate. The biological composition of a landscape (its resin content, moisture retention, and foliage density) acts as either a powerful accelerant or a natural barrier to spreading flames.
+        </p>
+        <p class="vegetation-intro">Select a tree species on the left or directly on the map to evaluate its structural fire resistance.</p>
+        
+        <div class="map-container">
+            <div class="map-sidebar">
+                <button class="tree-category-btn" id="btn-oaks" onclick="filterMap('oaks')">
+                    <div class="category-color-dot dot-oaks"></div>
+                    Oaks
+                </button>
+                <button class="tree-category-btn" id="btn-beech" onclick="filterMap('beech')">
+                    <div class="category-color-dot dot-beech"></div>
+                    Beech trees
+                </button>
+                <button class="tree-category-btn" id="btn-maritime" onclick="filterMap('maritime')">
+                    <div class="category-color-dot dot-maritime"></div>
+                    Maritime pine
+                </button>
+                <button class="tree-category-btn" id="btn-scots" onclick="filterMap('scots')">
+                    <div class="category-color-dot dot-scots"></div>
+                    Scots pine
+                </button>
+                <button class="tree-category-btn" id="btn-fir" onclick="filterMap('fir')">
+                    <div class="category-color-dot dot-fir"></div>
+                    Fir / Spruce
+                </button>
+                <button class="tree-category-btn" id="btn-other" onclick="filterMap('other')">
+                    <div class="category-color-dot dot-other"></div>
+                    Other types of vegetation
+                </button>
+                <button class="tree-category-btn active" id="btn-all" onclick="filterMap('all')" style="justify-content: center; color: #a0a0a0; margin-top: 6px;">
+                    Show All
+                </button>
+            </div>
+            
+            <div class="france-map-wrapper">
+                <canvas id="franceCanvas"></canvas>
+            </div>
+
+            <div class="tree-info-panel" id="treeInfoPanel">
+                <img src="" id="treeInfoImage" alt="Tree species">
+                <div class="tree-info-text">
+                    <h3 id="treeInfoTitle">Title</h3>
+                    <div id="treeInfoBadge" class="flammability-badge"></div>
+                    <p id="treeInfoDesc">Description</p>
+                </div>
+            </div>
+        </div>
     </section>
     
     <section id="impact" class="section-bloc">
-        <h2>Impact & Assessment</h2>
-        <p style="color: var(--text-muted);">Chronological chart and CO2 counters will go here.</p>
+        <h2>Environmental Toll</h2>
+        <p class="section-stakes">
+            Wildfires are not only a consequence of climate change; they are also a driver of it. Tracking burned surfaces over the past two decades reveals the massive carbon footprint of forest destruction and the shifting effectiveness of national prevention strategies.
+        </p>
+
+        <div class="impact-container">
+            <div class="impact-top-row">
+                <div class="chart-wrapper">
+                    <canvas id="impactChart"></canvas>
+                </div>
+
+                <div class="counters-wrapper">
+                    <div class="counter-box">
+                        <h4>CO₂ Emissions</h4>
+                        <div class="counter-value"><span id="co2Counter">0</span> <small>Tons</small></div>
+                    </div>
+                    <div class="counter-box">
+                        <h4>Equivalent Cars</h4>
+                        <div class="counter-value"><span id="carCounter">0</span> <small>Cars/Year</small></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="time-machine">
+                <label for="yearSlider">Timeline: <span id="currentYearDisplay">...</span></label>
+                <input type="range" id="yearSlider" class="custom-slider">
+            </div>
+            
+            <div class="era-text" id="eraText"></div>
+        </div>
     </section>
 
     <section id="methodology" class="section-bloc">
-        <h2>Methodology</h2>
-        <p style="color: var(--text-muted);">Sources and data references.</p>
+        <h2>Sources</h2>
+        <div class="methodology-content">
+            <p><strong>Data Sources & References:</strong></p>
+            <ul>
+                <li><a href="https://bdiff.agriculture.gouv.fr/" target="_blank" rel="noopener noreferrer">BDIFF (Base de Données sur les Incendies de Forêts en France)</a>: Historical data on fire locations, nature, and burned surface areas since 1973.</li>
+                <li><a href="https://ourworldindata.org/wildfires" target="_blank" rel="noopener noreferrer">Our World in Data</a>: Datasets regarding annual temperature anomalies (2002-2026) and wildfire area burned categorized by land cover type.</li>
+                <li><a href="https://firms.modaps.eosdis.nasa.gov/" target="_blank" rel="noopener noreferrer">NASA FIRMS (Fire Information for Resource Management System)</a>: Satellite tracking of active fire spots and thermal anomalies.</li>
+                <li><a href="https://www.citepa.org/" target="_blank" rel="noopener noreferrer">CITEPA</a>: Data utilized for calculating greenhouse gas and CO₂ emissions resulting from forest fires.</li>
+                <li><a href="https://www.observatoire-foret.fr/" target="_blank" rel="noopener noreferrer">Observatoire de la Forêt (Gouvernement Français)</a>: National mapping of forest vegetation sensitivity to wildfires.</li>
+            </ul>
+        </div>
+    </section>
+    
+    <section id="about" class="section-bloc" style="background-color: #0d0d0d;">
+        <h2>About Us</h2>
+        <div class="about-intro">
+            <p>We are SMD3 students who relentlessly work hand in hand to provide the most accurate and digestible information to the world.</p>
+            <p>Our goal is to allow users to understand the underlying mechanisms that cause various phenomena and their consequences. This first page is on wildfires but many more are to come and we are eager to contribute to a world full of well informed individuals who act thoughtfully and well educated on topics that matter to all.</p>
+        </div>
+
+        <h3 class="team-heading">The Team</h3>
+        <div class="team-grid">
+            <div class="team-card">
+                <img src="/static/images/photo jeanne.jpg" alt="Jeanne Coquerel-Le Negaret" onerror="if(!this.dataset.t){this.dataset.t=1;this.src='/static/images/photo jeanne.png';}else if(this.dataset.t==1){this.dataset.t=2;this.src='/static/images/photo jeanne.jpeg';}">
+                <p class="team-name">Jeanne Coquerel-Le Negaret</p>
+            </div>
+
+            <div class="team-card">
+                <img src="/static/images/photo alice.jpg" alt="Alice Gaudin" onerror="if(!this.dataset.t){this.dataset.t=1;this.src='/static/images/photo alice.png';}else if(this.dataset.t==1){this.dataset.t=2;this.src='/static/images/photo alice.jpeg';}">
+                <p class="team-name">Alice Gaudin</p>
+            </div>
+
+            <div class="team-card">
+                <img src="/static/images/photo maho.jpg" alt="Maho Hirrien" onerror="if(!this.dataset.t){this.dataset.t=1;this.src='/static/images/photo maho.png';}else if(this.dataset.t==1){this.dataset.t=2;this.src='/static/images/photo maho.jpeg';}">
+                <p class="team-name">Maho Hirrien</p>
+            </div>
+        </div>
     </section>
 
-    <!-- 4. SCRIPTS JS -->
     <script>
-        /* --- 1. NOUVEL EFFET THERMIQUE (100% STABLE) --- */
-        const titleBox = document.getElementById('hero-title-box');
-        const title = document.getElementById('hero-title');
-        
-        // Ajoute la classe d'animation quand on passe la souris
-        titleBox.addEventListener('mouseenter', () => {
-            title.classList.add('heat-active');
-        });
-        
-        // Retire la classe quand on part (le CSS transition adoucit le retour)
-        titleBox.addEventListener('mouseleave', () => {
-            title.classList.remove('heat-active');
-        });
-
-        /* --- 2. FIX ACTUALISATION PAGE --- */
-        if (window.location.hash) {
-            window.history.replaceState(null, null, window.location.pathname);
-        }
+        if (window.location.hash) { window.history.replaceState(null, null, window.location.pathname); }
         window.scrollTo(0, 0);
-
-        /* --- 3. SCROLL REVEAL (BALAYAGE SECTIONS) --- */
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) { 
-                    entry.target.classList.add('visible'); 
-                }
-            });
-        }, { threshold: 0.15 });
-
+        const observer = new IntersectionObserver((entries) => { entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }); }, { threshold: 0.15 });
         document.querySelectorAll('.section-bloc').forEach(sec => observer.observe(sec));
 
-        /* --- 4. LOGIQUE QCM & CHART.JS --- */
         let chartRendered = false;
-
-        function checkAnswer(button, isCorrect) {
-            document.querySelectorAll('.quiz-btn').forEach(btn => btn.classList.remove('error', 'success'));
-            
+        function checkAnswer(btnNum, isCorrect) {
+            for(let i=1; i<=3; i++) {
+                document.getElementById('btn'+i).className = 'quiz-btn';
+            }
+            const btn = document.getElementById('btn'+btnNum);
             if (isCorrect) {
-                // Bonne réponse
-                button.classList.add('success');
-                document.getElementById('chart-container').classList.add('revealed');
-                
-                if (!chartRendered) { 
-                    renderChart(); 
-                    chartRendered = true; 
-                }
-                
-                // Scroll fluide pour voir le graphique
-                setTimeout(() => {
-                    document.getElementById('chart-container').scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 300);
-
+                btn.classList.add('success'); 
+                document.getElementById('chart-section').classList.add('revealed');
+                if (!chartRendered) { renderChart(); chartRendered = true; }
             } else {
-                // Mauvaise réponse
-                button.classList.add('error');
-                setTimeout(() => button.classList.remove('error'), 400);
+                btn.classList.add('error');
             }
         }
-
         function renderChart() {
-            const ctx = document.getElementById('causesChart').getContext('2d');
-            
-            Chart.defaults.color = '#F7F3EE';
-            Chart.defaults.font.family = 'Inter';
-
-            new Chart(ctx, {
+            new Chart(document.getElementById('causesChart').getContext('2d'), {
                 type: 'doughnut',
                 data: {
-                    labels: ['Natural', 'Accidental', 'Malicious (Arson)', 'Involuntary (Work)', 'Involuntary (Individuals)'],
-                    datasets: [{
-                        data: [12, 19, 30, 20, 19], 
-                        backgroundColor: [
-                            'rgba(247, 243, 238, 0.8)', // Blanc cassé
-                            '#4a0606', // Rouge sombre
-                            '#B31313', // Rouge clair
-                            'rgba(247, 243, 238, 0.4)', // Semi-transparent
-                            '#000000'  // Noir
-                        ],
-                        borderWidth: 2,
-                        borderColor: '#870D0D', // Couleur du fond de la section
-                        hoverOffset: 15
-                    }]
+                    labels: ['Natural', 'Accidental', 'Voluntary', 'Involuntary (Work)', 'Involuntary (Individuals)'],
+                    datasets: [{ data: [12, 19, 30, 20, 19], backgroundColor: ['#2c3e50', '#e67e22', '#c0392b', '#f39c12', '#d35400'], borderWidth: 2, borderColor: '#0f0f0f' }]
                 },
                 options: { 
                     responsive: true, 
-                    plugins: { 
-                        legend: { position: 'bottom', labels: { padding: 20 } } 
-                    },
-                    cutout: '65%' // Taille du trou au centre
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                    hover: { mode: null },
+                    animation: { animateScale: true }
                 }
             });
+        }
+
+        const tempRange = document.getElementById('tempRange'), windRange = document.getElementById('windRange'), humRange = document.getElementById('humRange');
+        const tempVal = document.getElementById('tempVal'), windVal = document.getElementById('windVal'), humVal = document.getElementById('humVal');
+        const weatherSimulator = document.getElementById('simulator-container'), alertBox = document.getElementById('risk-alert-box'), alertTitle = document.getElementById('risk-title'), alertText = document.getElementById('risk-text');
+
+        function checkFireWeather() {
+            const temp = parseInt(tempRange.value), wind = parseInt(windRange.value), hum = parseInt(humRange.value);
+            tempVal.textContent = temp; windVal.textContent = wind; humVal.textContent = hum;
+            weatherSimulator.className = 'weather-simulator'; alertBox.className = '';
+            
+            if (temp >= 30 && wind >= 30 && hum <= 30) {
+                weatherSimulator.classList.add('danger-extreme'); alertBox.classList.add('risk-extreme');
+                alertTitle.innerHTML = 'ALERT ! 30-30-30 Rule surpassed !'; 
+                alertText.innerHTML = 'You have triggered severe fire weather conditions. When temperatures exceed 30°C, wind speeds surpass 30 km/h, and relative humidity drops below 30%, the environment becomes highly conducive to mega-fires. High winds dry out the vegetation and can project glowing embers hundreds of meters ahead of the main fire front, causing rapid and uncontrollable spread.';
+            } else if (temp >= 28 || wind >= 25 || hum <= 35) {
+                weatherSimulator.classList.add('danger-high'); alertBox.classList.add('risk-high');
+                alertTitle.innerHTML = 'Moderate Risk'; 
+                alertText.innerHTML = 'Meteorological variables indicate an elevated Fire Weather Index. The combination of warming temperatures and declining relative humidity accelerates the desiccation of larger vegetation. Increased wind speeds at this level facilitate steady fire propagation, requiring rapid intervention to prevent escalation.';
+            } else if (temp >= 24 || wind >= 15 || hum <= 50) {
+                weatherSimulator.classList.add('danger-moderate'); alertBox.classList.add('risk-moderate');
+                alertTitle.innerHTML = 'Low Risk'; 
+                alertText.innerHTML = 'While baseline conditions remain largely stable, slight increases in temperature initiate the drying of fine surface fuels. Fires may ignite under these parameters, but their spread is generally slow, confined to the ground level, and easily contained by standard suppression efforts.';
+            } else {
+                weatherSimulator.classList.add('danger-low'); alertBox.classList.add('risk-low');
+                alertTitle.innerHTML = 'Safe State'; 
+                alertText.innerHTML = 'Under current meteorological parameters, the Fire Weather Index (FWI) remains stable. The risk of rapid fire propagation is low.';
+            }
+        }
+        tempRange.addEventListener('input', checkFireWeather); windRange.addEventListener('input', checkFireWeather); humRange.addEventListener('input', checkFireWeather);
+        checkFireWeather();
+
+        const treeData = {
+            oaks: {
+                title: 'Oaks',
+                badgeText: 'Flammability Risk: Low (2/5)',
+                badgeClass: 'badge-low',
+                desc: 'Oaks are known for their ability to withstand fires thanks to their thick, pitted bark. In the event of a fire, the cork oak can regenerate quickly because of its ability to shed its bark and regrow, making it a preferred choice for forests and properties located in fire-prone areas.',
+                img: '/static/images/oaks.jpg',
+                fallback: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=600&q=80'
+            },
+            beech: {
+                title: 'Beech Trees',
+                badgeText: 'Flammability Risk: Low (1/5)',
+                badgeClass: 'badge-low',
+                desc: 'Beech trees are generally not very flammable because their trunks contain a high water content, but they can burn during prolonged droughts when the leaf litter and humus dry out, especially when there is wind. Large trunks are more resistant to heat, but fungi can weaken them after a fire.',
+                img: '/static/images/beech trees.jpg',
+                fallback: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=80'
+            },
+            maritime: {
+                title: 'Maritime Pine',
+                badgeText: 'Flammability Risk: Very High (5/5)',
+                badgeClass: 'badge-high',
+                desc: 'Among the most vulnerable and highly flammable on a large scale: its resin, dry needles, and the high density of young stands contribute to rapid and intense fires. Only mature trees with thick bark and tall canopies are better able to withstand a light fire.',
+                img: '/static/images/maritime pines.jpg',
+                fallback: 'https://images.unsplash.com/photo-1590089851624-9549df9c3132?auto=format&fit=crop&w=600&q=80'
+            },
+            scots: {
+                title: 'Scots Pines',
+                badgeText: 'Flammability Risk: Moderate to High (4/5)',
+                badgeClass: 'badge-moderate',
+                desc: 'Mature trees have thick bark and a tall canopy that limit the spread of flames during light fires, but the species remains a vulnerable conifer: dry litter on the ground and dry or windy weather can lead to severe fires (especially in dense or poorly maintained stands), despite the fact that the species reduces its flammability by providing as little fuel as possible to the fire and by insulating its crown.',
+                img: '/static/images/scots pines.jpg',
+                fallback: 'https://images.unsplash.com/photo-1511497584788-876760111969?auto=format&fit=crop&w=600&q=80'
+            },
+            fir: {
+                title: 'Fir / Spruce',
+                badgeText: 'Flammability Risk: Moderate to High (4/5)',
+                badgeClass: 'badge-moderate',
+                desc: 'They are fairly vulnerable to fire under dry conditions: their resin, dense foliage (which is sometimes low-growing), and relatively thin bark make it easier for flames to spread, especially when drought or bark beetles have weakened the trees.',
+                img: '/static/images/fir spruce.jpg',
+                fallback: 'https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=600&q=80'
+            },
+            other: {
+                title: 'Other Vegetation Types',
+                badgeText: 'Flammability Risk: Variable (2-5/5)',
+                badgeClass: 'badge-variable',
+                desc: 'Depending on the types of vegetation present (deciduous trees, shrubs, coppice, or other conifers), the response to fire varies greatly: some regrow quickly after a fire, while dense brush or dry wood can fuel rapid fires during dry periods.',
+                img: '/static/images/mix végétation.jpg',
+                fallback: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=600&q=80'
+            }
+        };
+
+        const franceCanvas = document.getElementById('franceCanvas');
+        const mapCtx = franceCanvas.getContext('2d', { willReadFrequently: true });
+        let originalImageData = null;
+
+        function rgbToHsl(r, g, b) {
+            r /= 255; g /= 255; b /= 255;
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h = 0, s = 0, l = (max + min) / 2;
+            if (max !== min) {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h *= 60;
+            }
+            return [h, s, l];
+        }
+
+        function classifyPixel(r, g, b, a) {
+            if (a < 50) return 'bg';
+            if (r > 235 && g > 235 && b > 235) return 'bg';
+            const [h, s, l] = rgbToHsl(r, g, b);
+            if (l < 0.25 && s < 0.35) return 'outline';
+            if (s < 0.22 && l >= 0.25 && l <= 0.72) return 'other';
+            if (h >= 270 && h <= 345) return 'maritime';
+            if (h >= 175 && h <= 230) return 'fir';
+            if (h >= 22 && h <= 65 && s >= 0.35) return 'scots';
+            if (h >= 75 && h <= 160) {
+                return l > 0.45 ? 'oaks' : 'beech';
+            }
+            if (l < 0.38) return 'outline';
+            return 'other';
+        }
+
+        function renderMapCanvas(selectedCategory) {
+            if (!originalImageData) return;
+            const width = originalImageData.width;
+            const height = originalImageData.height;
+            const src = originalImageData.data;
+            const output = mapCtx.createImageData(width, height);
+            const dst = output.data;
+
+            for (let i = 0; i < src.length; i += 4) {
+                const r = src[i], g = src[i + 1], b = src[i + 2], a = src[i + 3];
+                const cat = classifyPixel(r, g, b, a);
+
+                if (cat === 'bg') {
+                    dst[i + 3] = 0;
+                } else if (cat === 'outline') {
+                    dst[i] = 150; dst[i + 1] = 150; dst[i + 2] = 150; dst[i + 3] = 255;
+                } else if (selectedCategory === 'all' || cat === selectedCategory) {
+                    dst[i] = r; dst[i + 1] = g; dst[i + 2] = b; dst[i + 3] = 255;
+                } else {
+                    dst[i] = 36; dst[i + 1] = 36; dst[i + 2] = 36; dst[i + 3] = 255;
+                }
+            }
+            mapCtx.putImageData(output, 0, 0);
+        }
+
+        const mapImg = new Image();
+        mapImg.onload = function() {
+            franceCanvas.width = mapImg.naturalWidth;
+            franceCanvas.height = mapImg.naturalHeight;
+            mapCtx.drawImage(mapImg, 0, 0);
+            originalImageData = mapCtx.getImageData(0, 0, franceCanvas.width, franceCanvas.height);
+            renderMapCanvas('all');
+        };
+        mapImg.onerror = function() {
+            if (mapImg.src.endsWith('.png')) {
+                mapImg.src = '/static/images/carte.jpg';
+            }
+        };
+        mapImg.src = '/static/images/carte.png';
+
+        franceCanvas.addEventListener('click', (e) => {
+            if (!originalImageData) return;
+            const rect = franceCanvas.getBoundingClientRect();
+            const x = Math.floor((e.clientX - rect.left) * (franceCanvas.width / rect.width));
+            const y = Math.floor((e.clientY - rect.top) * (franceCanvas.height / rect.height));
+            const idx = (y * franceCanvas.width + x) * 4;
+            const cat = classifyPixel(
+                originalImageData.data[idx],
+                originalImageData.data[idx + 1],
+                originalImageData.data[idx + 2],
+                originalImageData.data[idx + 3]
+            );
+            if (treeData[cat]) {
+                filterMap(cat);
+            }
+        });
+
+        function filterMap(category) {
+            const panel = document.getElementById('treeInfoPanel');
+            
+            document.querySelectorAll('.tree-category-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('btn-' + category).classList.add('active');
+            
+            renderMapCanvas(category);
+            
+            if (category === 'all') {
+                panel.classList.remove('visible');
+            } else {
+                const info = treeData[category];
+                const imgEl = document.getElementById('treeInfoImage');
+                const badgeEl = document.getElementById('treeInfoBadge');
+                document.getElementById('treeInfoTitle').textContent = info.title;
+                badgeEl.textContent = info.badgeText;
+                badgeEl.className = 'flammability-badge ' + info.badgeClass;
+                document.getElementById('treeInfoDesc').textContent = info.desc;
+                imgEl.onerror = function() { this.onerror = null; this.src = info.fallback; };
+                imgEl.src = info.img;
+                panel.classList.add('visible');
+            }
+        }
+
+        let bilanData = []; let impactChart;
+        const yearSlider = document.getElementById('yearSlider'), currentYearDisplay = document.getElementById('currentYearDisplay'), co2Counter = document.getElementById('co2Counter'), carCounter = document.getElementById('carCounter');
+        const eraText = document.getElementById('eraText');
+        let currentCo2 = 0; let currentCars = 0;
+
+        function animateValue(obj, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = Math.floor(progress * (end - start) + start).toLocaleString('en-US');
+                if (progress < 1) window.requestAnimationFrame(step);
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        fetch('/api/bilan')
+            .then(response => response.json())
+            .then(data => {
+                bilanData = data;
+                const minYear = Math.min(...bilanData.map(d => d.year)), maxYear = Math.max(...bilanData.map(d => d.year));
+                yearSlider.min = minYear; yearSlider.max = maxYear; yearSlider.value = minYear; currentYearDisplay.textContent = minYear;
+                initImpactChart(minYear); updateCounters(minYear); updateEraText(minYear);
+            }).catch(e => console.error(e));
+
+        function initImpactChart(selectedYear) {
+            const ctx = document.getElementById('impactChart').getContext('2d');
+            const years = bilanData.map(d => d.year), hectares = bilanData.map(d => d.hectares);
+            const bgColors = years.map(y => y == selectedYear ? '#ff4500' : 'rgba(255, 255, 255, 0.1)');
+            impactChart = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: years, datasets: [{ label: 'Burned Hectares', data: hectares, backgroundColor: bgColors, borderRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#a0a0a0' } }, x: { grid: { display: false }, ticks: { color: '#a0a0a0' } } } }
+            });
+        }
+
+        function updateEraText(year) {
+            if (year <= 2003) {
+                eraText.innerHTML = 'The early 2000s represent a historical peak in forest destruction. Driven by catastrophic summer conditions, wildfires consumed immense territories, exceeding 96,000 hectares in 2002. This unprecedented release of CO₂ exposed the vulnerability of French forests and prompted an urgent, structural overhaul of national firefighting strategies.';
+            } else if (year >= 2004 && year <= 2013) {
+                eraText.innerHTML = "This prolonged period reflects a drastic reduction in CO₂ emissions and burned areas, driven by massive state investments in the DFCI (Défense de la Forêt Contre les Incendies). The systematic deployment of aerial resources, mandatory brush-clearing policies, and a strict 'ten-minute initial attack' doctrine successfully contained most ignitions before they could escalate.";
+            } else if (year >= 2014 && year <= 2021) {
+                eraText.innerHTML = 'During this transitional phase, the steady decline in burned areas begins to plateau. While rapid-response strategies remain highly effective, emerging climate stressors such as prolonged dry seasons and increasingly frequent localized heatwaves start to exert continuous pressure on ecosystems. This period marks the end of the steep downward trend in emissions, subtly signaling that traditional prevention methods are reaching their operational limits against a shifting baseline climate.';
+            } else if (year >= 2022) {
+                eraText.innerHTML = 'Despite possessing a highly optimized fire prevention system, 2022 marks a severe climate backlash. Extreme meteorological conditions (historic droughts and intense heatwaves) overwhelmed containment capacities, resulting in massive burned areas and a drastic spike in CO₂ emissions. This rupture illustrates how climate change can rapidly neutralize decades of human prevention efforts.';
+            }
+        }
+
+        yearSlider.addEventListener('input', (e) => {
+            const selectedYear = parseInt(e.target.value);
+            currentYearDisplay.textContent = selectedYear; 
+            updateCounters(selectedYear);
+            updateEraText(selectedYear);
+            
+            if(impactChart) {
+                impactChart.data.datasets[0].backgroundColor = impactChart.data.labels.map(y => y == selectedYear ? '#ff4500' : 'rgba(255, 255, 255, 0.1)');
+                impactChart.update();
+            }
+        });
+
+        function updateCounters(year) {
+            const yearData = bilanData.find(d => d.year === year);
+            if(yearData) {
+                animateValue(co2Counter, currentCo2, yearData.co2, 600);
+                animateValue(carCounter, currentCars, yearData.cars, 600);
+                currentCo2 = yearData.co2; currentCars = yearData.cars;
+            }
         }
     </script>
 </body>
